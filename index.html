@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meetup App — Development Presentation Pitch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --warm-paper: #FAF8F5;
+            --meetup-pink: #FC3F6E;
+            --meetup-pink-deep: #C81155;
+            --meetup-purple: #7B5FFF;
+            --slate-950: #020617;
+            --slate-900: #0F172A;
+            --slate-800: #1E293B;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --white: #FFFFFF;
+            --border-light: #E2E8F0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--slate-950);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+        }
+
+        /* Persistent Brand Awning */
+        .awning-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(
+                135deg,
+                var(--meetup-pink),
+                var(--meetup-pink) 20px,
+                var(--meetup-purple) 20px,
+                var(--meetup-purple) 40px
+            );
+            z-index: 1000;
+        }
+
+        /* Presentation Snap Scrolling */
+        .presentation-wrapper {
+            height: 100svh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .slide {
+            height: 100svh;
+            width: 100%;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 5%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Theme Variants */
+        .slide-light { background-color: var(--warm-paper); color: var(--text-main); }
+        .slide-dark { background-color: var(--slate-950); color: var(--white); }
+        .slide-dark-alt { background-color: var(--slate-900); color: var(--white); }
+
+        .slide-light .text-muted { color: var(--text-muted); }
+        .slide-dark .text-muted, .slide-dark-alt .text-muted { color: #94A3B8; }
+
+        /* Animation Classes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .slide.is-visible .reveal { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+        .delay-4 { transition-delay: 0.4s; }
+        .delay-5 { transition-delay: 0.5s; }
+
+        /* -------------------------------------
+           SLIDE 1: Cinematic Cover
+        ------------------------------------- */
+        .cover-slide {
+            background-color: var(--slate-950);
+            background-image:
+                radial-gradient(circle at 50% 0%, rgba(252, 63, 110, 0.18) 0%, transparent 50%),
+                linear-gradient(to bottom, transparent, var(--slate-950) 80%);
+            position: relative;
+        }
+
+        .floating-gallery {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .floating-gallery img {
+            position: absolute;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: drift ease-in-out infinite alternate;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(30px, -40px) rotate(4deg); }
+        }
+
+        .img-1 { width: 260px; top: -5%; left: -2%; opacity: 0.08; filter: blur(2px); animation-duration: 25s; }
+        .img-2 { width: 320px; top: 15%; right: -5%; opacity: 0.06; filter: blur(4px); animation-duration: 32s; animation-delay: -5s; }
+        .img-3 { width: 200px; bottom: 8%; left: 6%; opacity: 0.12; animation-duration: 22s; animation-delay: -2s; }
+        .img-4 { width: 230px; top: 42%; left: 16%; opacity: 0.06; filter: blur(1px); animation-duration: 28s; animation-delay: -10s; }
+        .img-5 { width: 280px; bottom: -12%; right: 8%; opacity: 0.08; filter: blur(3px); animation-duration: 35s; animation-delay: -15s; }
+        .img-6 { width: 190px; top: 6%; left: 45%; opacity: 0.09; animation-duration: 20s; animation-delay: -7s; }
+        .img-7 { width: 250px; bottom: 22%; left: 36%; opacity: 0.05; filter: blur(2px); animation-duration: 27s; animation-delay: -12s; }
+
+        .cover-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 1000px;
+            transform: scale(0.8);
+            transform-origin: center;
+            z-index: 2;
+        }
+        .cover-logo {
+            height: 90px;
+            width: auto;
+            margin-bottom: 2.5rem;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+        .cover-content h1 {
+            font-size: clamp(3.5rem, 6vw, 6rem);
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            line-height: 1.1;
+        }
+        .cover-content .accent-text { color: var(--meetup-pink); }
+
+        .cover-content .subtitle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-family: 'Inter', sans-serif;
+            color: #94A3B8;
+            margin-bottom: 3.5rem;
+            font-weight: 500;
+        }
+        .cover-content .subtitle svg { fill: var(--meetup-pink); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--meetup-pink);
+            color: var(--white);
+            font-weight: 600;
+            text-decoration: none;
+            padding: 1.25rem 3rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+            box-shadow: 0 10px 25px -5px rgba(252, 63, 110, 0.4);
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover { background-color: var(--meetup-pink-deep); transform: translateY(-2px); box-shadow: 0 15px 35px -5px rgba(252, 63, 110, 0.6); }
+
+        /* Proof / Availability Band */
+        .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 4rem; border-radius: 24px; backdrop-filter: blur(10px); }
+        .status-item h4 { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-transform: uppercase; color: #94A3B8; margin-bottom: 0.75rem; letter-spacing: 0.05em; }
+        .status-item p { font-size: 1.25rem; font-weight: 500; }
+        .status-dot { display: inline-block; width: 10px; height: 10px; background-color: #10B981; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 12px rgba(16, 185, 129, 0.6); }
+
+        .proof-split { display: flex; align-items: center; justify-content: space-between; gap: 4rem; height: 100%; }
+        .proof-text { flex: 1; max-width: 460px; }
+        .proof-visual { flex: 1; display: flex; justify-content: center; }
+        .proof-visual img { width: 100%; max-width: 400px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 40px 80px -20px rgba(0,0,0,0.6); }
+        .eyebrow { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.85rem; font-weight: 600; color: var(--meetup-pink); margin-bottom: 1.25rem; display: block; }
+
+        /* -------------------------------------
+           Screenshot-Focused Layout
+        ------------------------------------- */
+        .feature-split { display: flex; align-items: center; justify-content: space-between; gap: 4rem; height: 100%; }
+        .slide:nth-child(even) .feature-split { flex-direction: row-reverse; }
+
+        .feature-text { flex: 1; max-width: 480px; }
+
+        .slide-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .slide-indicator .num { color: var(--meetup-pink); font-size: 1.5rem; font-weight: 800; }
+        .slide-indicator .line { height: 2px; width: 40px; background-color: var(--meetup-pink); }
+        .slide-light .slide-indicator .label { color: var(--slate-800); }
+        .slide-dark .slide-indicator .label, .slide-dark-alt .slide-indicator .label { color: var(--white); }
+
+        .feature-text h2 { font-size: clamp(2.2rem, 4vw, 3.2rem); margin-bottom: 1.5rem; line-height: 1.1; }
+        .feature-text p { font-size: 1.1rem; line-height: 1.7; font-weight: 400; }
+
+        .feature-visual { flex: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        .phone-bezel {
+            width: 100%;
+            max-width: 340px;
+            background-color: var(--slate-950);
+            border-radius: 44px;
+            padding: 10px;
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .slide-light .phone-bezel { box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.15); border-color: var(--border-light); background-color: var(--slate-800); }
+        .phone-bezel img { width: 100%; height: auto; border-radius: 34px; display: block; }
+
+        .micro-line { margin-top: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--meetup-pink); text-align: center; max-width: 400px; }
+
+        /* Dashboard Slide */
+        .dashboard-ui { background-color: #0F172A; border-radius: 12px; border: 1px solid #334155; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.6); width: 100%; max-width: 550px;}
+        .ui-header { background-color: #1E293B; padding: 1rem 1.5rem; border-bottom: 1px solid #334155; display: flex; gap: 8px; }
+        .ui-header .dot { width: 12px; height: 12px; border-radius: 50%; background-color: #475569; }
+        .ui-body { padding: 3rem; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #CBD5E1; }
+        .ui-row { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px dashed #334155; }
+
+        /* CTA */
+        .cta-content { text-align: center; max-width: 900px; margin: 0 auto; }
+        .cta-content h2 { font-size: clamp(3rem, 5vw, 4.5rem); margin-bottom: 1.5rem; }
+        .cta-content p { font-size: 1.25rem; margin-bottom: 2rem; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.8; }
+        .cta-credit { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 2.5rem; }
+        .cta-credit img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.15); }
+        .cta-credit .credit-text { text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; }
+        .cta-credit .credit-text strong { display: block; color: var(--white); font-family: 'Inter', sans-serif; font-size: 0.95rem; text-transform: none; letter-spacing: normal; }
+
+        /* Scroll Indicator */
+        .scroll-indicator { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.5rem; opacity: 0.6; animation: bounce 2s infinite; z-index: 10; }
+        .scroll-indicator span { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--white); }
+        .scroll-indicator .line { width: 1px; height: 30px; background-color: var(--white); }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-10px) translateX(-50%); }
+            60% { transform: translateY(-5px) translateX(-50%); }
+        }
+
+        /* Responsive */
+        @media (max-width: 960px) {
+            .feature-split, .slide:nth-child(even) .feature-split,
+            .proof-split { flex-direction: column; text-align: center; justify-content: center; gap: 3rem; }
+            .feature-text, .proof-text { max-width: 100%; }
+            .slide-indicator { justify-content: center; }
+            .status-grid { grid-template-columns: 1fr; padding: 2rem; }
+            .phone-bezel { max-width: 300px; }
+            .slide { padding: 6rem 5% 2rem; height: auto; min-height: 100svh;}
+            .cover-content { transform: scale(0.9); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="awning-top"></div>
+
+    <div class="presentation-wrapper" id="scroll-container">
+
+        <!-- SLIDE 1: Cinematic Cover & Hook -->
+        <section class="slide cover-slide">
+
+            <div class="floating-gallery">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-1.webp" class="img-1">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-2.webp" class="img-2">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-3.webp" class="img-3">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-4.webp" class="img-4">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-5.webp" class="img-5">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-6.webp" class="img-6">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-7.webp" class="img-7">
+            </div>
+
+            <div class="container cover-content">
+                <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup.png" alt="Meetup Logo" class="cover-logo reveal">
+
+                <h1 class="reveal delay-1">I turn business ideas into apps <br><span class="accent-text">people actually use.</span></h1>
+
+                <div class="subtitle reveal delay-2">
+                    <svg viewBox="0 0 384 512" width="22" height="22"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                    <svg viewBox="0 0 576 512" width="26" height="26" style="margin-left:-4px;"><path d="M420.22 166.31L463.39 91.6c4.27-7.39 2.15-16.73-4.73-20.72-6.85-3.99-15.86-1.2-20.14 6.2l-44.25 76.59c-32.44-14.77-68.61-23.01-106.35-23.01s-73.91 8.24-106.35 23.01L137.33 77.08c-4.28-7.4-13.29-10.19-20.14-6.2-6.88 3.99-9 13.33-4.73 20.72l43.17 74.71C63.26 211.75 1.5 304.5 0 416h576c-1.5-111.5-63.26-204.25-155.78-249.69zM160 336c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32zm256 0c-17.67 0-32-14.33-32-32s14.33-32 32-32 32 14.33 32 32-14.33 32-32 32z"/></svg>
+                    <span>Available for both iOS and Android</span>
+                </div>
+
+                <div class="reveal delay-3">
+                    <a href="#proof" class="btn">See The Build</a>
+                </div>
+            </div>
+
+            <div class="scroll-indicator reveal delay-4">
+                <span>Scroll</span>
+                <div class="line"></div>
+            </div>
+        </section>
+
+        <!-- SLIDE 2: Proof it performs (Play Store listing) -->
+        <section class="slide slide-dark-alt" id="proof">
+            <div class="container proof-split">
+                <div class="proof-text">
+                    <span class="eyebrow reveal">Real store listing, not a mockup</span>
+                    <h2 class="reveal delay-1" style="font-size: clamp(2.2rem, 4vw, 3.2rem); margin-bottom: 1.5rem;">This is what "built to scale" actually looks like.</h2>
+                    <p class="text-muted reveal delay-2" style="font-size: 1.1rem; line-height: 1.7; margin-bottom: 2.5rem;">A 4.2★ average across 234k reviews and 10M+ downloads doesn't happen by accident — it happens when every screen, from onboarding to checkout equivalents, is built with the same discipline. This is the bar I build every project to.</p>
+                    <div class="status-grid reveal delay-3">
+                        <div class="status-item">
+                            <h4>Rating</h4>
+                            <p>4.2★ <span style="color:#94A3B8; font-weight:400; font-size:0.95rem;">/ 234k reviews</span></p>
+                        </div>
+                        <div class="status-item">
+                            <h4>Scale</h4>
+                            <p>10M+ downloads</p>
+                        </div>
+                        <div class="status-item">
+                            <h4>Current Intake</h4>
+                            <p><span class="status-dot"></span>2 new projects this quarter</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="proof-visual reveal delay-4">
+                    <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup%20playstore.png" alt="Meetup Play Store Listing">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3: Feature 01 - Onboarding Hero -->
+        <section class="slide slide-light">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <div class="slide-indicator reveal">
+                        <span class="num">01</span><span class="line"></span><span class="label">First Impression</span>
+                    </div>
+                    <h2 class="reveal delay-1">The first screen sets the entire tone.</h2>
+                    <p class="text-muted reveal delay-2">Most apps lose people in the first three seconds. This opening screen pairs warm, real photography with three punchy tags — "Find new friends," "Connect with people," "In your city" — so the value and the local relevance land before a single tap. That's the kind of first-impression work I only get right when a project isn't rushed.</p>
+                </div>
+                <div class="feature-visual reveal delay-3">
+                    <div class="phone-bezel">
+                        <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-1.webp" alt="Find your people onboarding screen">
+                    </div>
+                    <div class="micro-line">// Onboarding built to earn the second screen, not just the install.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4: Feature 02 - Discover Events -->
+        <section class="slide slide-dark">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <div class="slide-indicator reveal">
+                        <span class="num">02</span><span class="line"></span><span class="label">Discovery & Search</span>
+                    </div>
+                    <h2 class="reveal delay-1">Search built around real plans, not just keywords.</h2>
+                    <p class="text-muted reveal delay-2">Time tabs — Today, Tomorrow, Weekend — sit right next to category tabs for groups and social activities, and every event card already shows a rating, a "going" count, and a map shortcut. That's three layers of decision-making support before the user even opens the event. Details like this are what get skipped on rushed builds.</p>
+                </div>
+                <div class="feature-visual reveal delay-3">
+                    <div class="phone-bezel">
+                        <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-2.webp" alt="Discover events near you screen">
+                    </div>
+                    <div class="micro-line">// Filter by time, category, and trust signal — all in one glance.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 5: Feature 03 - Discover Your Passions -->
+        <section class="slide slide-light">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <div class="slide-indicator reveal">
+                        <span class="num">03</span><span class="line"></span><span class="label">Personalization Input</span>
+                    </div>
+                    <h2 class="reveal delay-1">Interests as the entry point, not an afterthought.</h2>
+                    <p class="text-muted reveal delay-2">Hand-drawn tag chips for Hiking, Cooking, Coding, Mountain Bike, and dozens more turn a single onboarding step into the seed for every recommendation the app will ever make. This is the same principle behind the client dashboard I build alongside every project: capture the real signal early, and everything downstream gets smarter automatically.</p>
+                </div>
+                <div class="feature-visual reveal delay-3">
+                    <div class="phone-bezel">
+                        <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-6.webp" alt="Discover your passions interest tags">
+                    </div>
+                    <div class="micro-line">// What a user taps here is what a homepage learns from later.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 6: Feature 04 - Group Welcome -->
+        <section class="slide slide-dark-alt">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <div class="slide-indicator reveal">
+                        <span class="num">04</span><span class="line"></span><span class="label">Post-Join Moment</span>
+                    </div>
+                    <h2 class="reveal delay-1">The moment right after joining is the moment that matters most.</h2>
+                    <p class="text-muted reveal delay-2">A confirmation card, a warm welcome message, and — critically — two related-group suggestions surfaced immediately, before the user has a chance to close the app and forget why they came. Most builds treat this screen as a formality. I treat it as the single highest-leverage moment in the whole flow.</p>
+                </div>
+                <div class="feature-visual reveal delay-3">
+                    <div class="phone-bezel">
+                        <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-3.webp" alt="Welcome to NYC Food Fanatics group screen">
+                    </div>
+                    <div class="micro-line">// Confirmed, welcomed, and already offered the next step — in one screen.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7: Feature 05 - Meet Friends in Real Life -->
+        <section class="slide slide-light">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <div class="slide-indicator reveal">
+                        <span class="num">05</span><span class="line"></span><span class="label">Beyond the Screen</span>
+                    </div>
+                    <h2 class="reveal delay-1">The product doesn't stop at the screen.</h2>
+                    <p class="text-muted reveal delay-2">Wine on a rooftop, a hike at sunset, a pottery studio, a group high-five — four completely different activities, curated so every kind of user sees themselves in it. This is what makes a lifestyle app feel authentic instead of generic: the imagery has to earn the promise the copy is making.</p>
+                </div>
+                <div class="feature-visual reveal delay-3">
+                    <div class="phone-bezel">
+                        <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-4.webp" alt="Meet friends in real life photo montage">
+                    </div>
+                    <div class="micro-line">// The app's job is to get out of the way once people actually meet.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 8: Feature 06 - Keep in Touch -->
+        <section class="slide slide-dark">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <div class="slide-indicator reveal">
+                        <span class="num">06</span><span class="line"></span><span class="label">Retention Layer</span>
+                    </div>
+                    <h2 class="reveal delay-1">Retention lives in the inbox.</h2>
+                    <p class="text-muted reveal delay-2">Unread badges, read receipts, and group threads that survive long after the event ends — this is the screen that decides whether someone opens the app again next week or forgets it exists. Getting messaging right is unglamorous, invisible work, and it's exactly where I spend the time other builds don't have.</p>
+                </div>
+                <div class="feature-visual reveal delay-3">
+                    <div class="phone-bezel">
+                        <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-5.webp" alt="Messages inbox screen">
+                    </div>
+                    <div class="micro-line">// The event ends. The conversation, and the reason to come back, doesn't.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9: Feature 07 - Community Scale -->
+        <section class="slide slide-dark-alt">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <div class="slide-indicator reveal">
+                        <span class="num">07</span><span class="line"></span><span class="label">Trust at Scale</span>
+                    </div>
+                    <h2 class="reveal delay-1">Scale becomes the pitch itself.</h2>
+                    <p class="text-muted reveal delay-2">"Join over 60 million members," backed by real, diverse faces instead of stock icons, does more to convert a hesitant install than any feature list could. Knowing when a number should be the hero of the screen — not buried in a footnote — is a design decision, not a copywriting one.</p>
+                </div>
+                <div class="feature-visual reveal delay-3">
+                    <div class="phone-bezel">
+                        <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/meetup-picture-7.webp" alt="Join over 60 million members screen">
+                    </div>
+                    <div class="micro-line">// Nothing sells an app faster than proof other people already trust it.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 10: The Dashboard Philosophy -->
+        <section class="slide slide-dark">
+            <div class="container feature-split">
+                <div class="feature-text">
+                    <h2 class="reveal">See everything.<br>Chase nothing.</h2>
+                    <p class="text-muted reveal delay-1" style="margin-bottom: 1.5rem;">The standard fear of hiring a developer is losing visibility once the contract is signed. You enter a black box and hope a finished product emerges months later.</p>
+                    <p class="text-muted reveal delay-2">I built a dedicated client dashboard to solve this. Real-time project status, milestone tracking, direct messaging, and file handoffs — all in one place.</p>
+                    <p class="reveal delay-3" style="color: var(--white); margin-top: 2rem; font-weight: 600; font-size: 1.25rem;">Restrictive access to get on the calendar. Total freedom and transparency once you are in.</p>
+                </div>
+                <div class="feature-visual reveal delay-4">
+                    <div class="dashboard-ui">
+                        <div class="ui-header">
+                            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        </div>
+                        <div class="ui-body">
+                            <div class="ui-row">
+                                <span>Sprint 03: Messaging Layer</span>
+                                <span style="color: var(--meetup-pink); font-weight: 700;">Active</span>
+                            </div>
+                            <div class="ui-row">
+                                <span>Latest Commit: Interest tag engine</span>
+                                <span>2 hrs ago</span>
+                            </div>
+                            <div class="ui-row">
+                                <span>Blockers</span>
+                                <span>None</span>
+                            </div>
+                            <div style="margin-top: 3rem; color: #64748B;">> System nominal. Client view synced.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 11: Closing CTA -->
+        <section class="slide slide-dark-alt">
+            <div class="container cta-content">
+                <h2 class="reveal">Ready to build?</h2>
+                <p class="text-muted reveal delay-1">Let's discuss your requirements, review the scope, and ensure our timelines align. You stay informed from the first conversation to the final deployment.</p>
+                <div class="cta-credit reveal delay-2">
+                    <img src="https://raw.githubusercontent.com/iktiarnazib/meetup-portfolio/main/Meetup/portfolio%20picture.jpeg" alt="Developer portrait">
+                    <span class="credit-text">Case study by<strong>Iktiar Nazib</strong></span>
+                </div>
+                <div class="reveal delay-3">
+                    <a href="mailto:hello@example.com" class="btn">See if there's an open slot</a>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Intersection Observer JS for Presentation Reveals -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const observerOptions = {
+                root: document.querySelector('#scroll-container'),
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.slide').forEach((slide) => {
+                observer.observe(slide);
+            });
+
+            document.querySelector('.slide').classList.add('is-visible');
+        });
+    </script>
+</body>
+</html>
